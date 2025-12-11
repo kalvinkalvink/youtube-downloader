@@ -248,7 +248,7 @@ class PlaylistDownloader:
             playlist_title = lines[-1]
             videos = []
 
-            for i in range(0, len(lines) - 1, 2):
+            for i in range(0, len(lines) - 1, 3):
                 if i + 1 < len(lines) - 1:
                     videos.append({
                         'title': lines[i],
