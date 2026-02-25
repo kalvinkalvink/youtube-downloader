@@ -49,8 +49,10 @@ def main(page: ft.Page) -> None:
     settings_tab = build_settings_tab(page, settings, download_manager)
 
     content_container = ft.Container(expand=True, content=playlist_tab.content)
+    current_index = 0
 
     def switch_view(index: int) -> None:
+        nonlocal current_index
         if index == 0:
             content_container.content = playlist_tab.content
         elif index == 1:
@@ -61,21 +63,32 @@ def main(page: ft.Page) -> None:
             content_container.content = downloads_tab.content
         elif index == 4:
             content_container.content = settings_tab.content
+
+        for i, btn in enumerate(buttons):
+            btn.style = ft.ButtonStyle(bgcolor=ft.Colors.PRIMARY, color=ft.Colors.WHITE) if i == index else None
+
+        current_index = index
         page.update()
 
+    playlist_btn = ft.TextButton(
+        "Playlist",
+        on_click=lambda e: switch_view(0),
+        style=ft.ButtonStyle(color=ft.Colors.PRIMARY),
+    )
+    single_btn = ft.TextButton("Single Video", on_click=lambda e: switch_view(1))
+    channel_btn = ft.TextButton("Channel", on_click=lambda e: switch_view(2))
+    downloads_btn = ft.TextButton("Downloads", on_click=lambda e: switch_view(3))
+    settings_btn = ft.TextButton("Settings", on_click=lambda e: switch_view(4))
+
+    buttons = [playlist_btn, single_btn, channel_btn, downloads_btn, settings_btn]
+
     buttons_row = ft.Row(
-        controls=[
-            ft.TextButton("Playlist", on_click=lambda e: switch_view(0)),
-            ft.TextButton("Single Video", on_click=lambda e: switch_view(1)),
-            ft.TextButton("Channel", on_click=lambda e: switch_view(2)),
-            ft.TextButton("Downloads", on_click=lambda e: switch_view(3)),
-            ft.TextButton("Settings", on_click=lambda e: switch_view(4)),
-        ],
+        controls=buttons,
         alignment=ft.MainAxisAlignment.START,
     )
 
     page.add(ft.Column(controls=[buttons_row, content_container], expand=True))
-
+    switch_view(0)
 
 if __name__ == "__main__":
     ft.run(main)
