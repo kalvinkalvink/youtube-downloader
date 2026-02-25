@@ -14,6 +14,7 @@ class PlaylistVideoInfo:
     video_id: str
     url: str
     thumbnail_url: Optional[str]
+    duration: Optional[str] = None
 
 
 @dataclass
@@ -83,6 +84,8 @@ def fetch_playlist_info(playlist_url: str) -> PlaylistInfo:
         "--print",
         "%(thumbnail)s",
         "--print",
+        "%(duration)s",
+        "--print",
         "%(playlist_title)s",
         playlist_url,
     ]
@@ -94,14 +97,13 @@ def fetch_playlist_info(playlist_url: str) -> PlaylistInfo:
     playlist_title = lines[-1]
     videos: List[PlaylistVideoInfo] = []
 
-    # Groups of 3 lines (title, id, thumbnail) per video, last line is playlist title
-    for i in range(0, len(lines) - 1, 4):
-        if i + 3 >= len(lines) - 1:
-            break
+    # Groups of 4 lines (title, id, thumbnail, duration) per video, last line is playlist title
+    for i in range(0, len(lines) - 1, 5):
         title = lines[i]
         vid = lines[i + 1]
         thumbnail = lines[i + 2] or None
-        playlist_title = lines[i + 3] or None
+        duration = lines[i + 3] if lines[i + 3] != "None" else None
+        playlist_title = lines[i + 4] or None
         url = f"https://www.youtube.com/watch?v={vid}"
         videos.append(
             PlaylistVideoInfo(
@@ -109,6 +111,7 @@ def fetch_playlist_info(playlist_url: str) -> PlaylistInfo:
                 video_id=vid,
                 url=url,
                 thumbnail_url=thumbnail,
+                duration=duration,
             )
         )
 

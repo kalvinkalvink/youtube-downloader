@@ -11,6 +11,7 @@ from app.services.yt_services import (
     PlaylistInfo,
     PlaylistVideoInfo,
     fetch_playlist_info,
+    format_duration,
 )
 from app.validator.youtube_validator import YouTubeValidator
 
@@ -32,6 +33,7 @@ def build_playlist_tab(page: ft.Page, download_manager: DownloadManager) -> ft.T
                     cb,
                     ft.Image(src=v.thumbnail_url or "", width=80, height=45),
                     ft.Text(v.title, expand=True),
+                    ft.Text(format_duration(v.duration)),
                 ],
                 alignment=ft.MainAxisAlignment.START,
             )
