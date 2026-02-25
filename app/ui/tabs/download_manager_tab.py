@@ -74,9 +74,34 @@ def build_download_manager_tab(
     download_manager.set_update_callback(refresh)
     refresh()
 
-    content = ft.Column(
+    def on_clear_completed(e: ft.BaseControl) -> None:
+        download_manager.clear_completed_tasks()
+
+    def on_cancel_all(e: ft.BaseControl) -> None:
+        download_manager.cancel_all_downloading()
+
+    clear_completed_btn = ft.TextButton(
+        "Clear Completed",
+        on_click=on_clear_completed,
+    )
+
+    cancel_all_btn = ft.TextButton(
+        "Cancel All",
+        on_click=on_cancel_all,
+    )
+
+    header_row = ft.Row(
         controls=[
             status_text,
+            ft.Container(expand=True),
+            clear_completed_btn,
+            cancel_all_btn,
+        ]
+    )
+
+    content = ft.Column(
+        controls=[
+            header_row,
             ft.Container(content=table, expand=True),
         ],
         expand=True,

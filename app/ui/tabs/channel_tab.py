@@ -7,7 +7,12 @@ import flet as ft
 
 from app.core.models import DownloadTask, DownloadType
 from app.services.download_manager import DownloadManager
-from app.services.yt_services import ChannelInfo, ChannelVideoInfo, fetch_channel_info
+from app.services.yt_services import (
+    ChannelInfo,
+    ChannelVideoInfo,
+    fetch_channel_info,
+    format_duration,
+)
 from app.validator.youtube_validator import YouTubeValidator
 
 
@@ -29,7 +34,7 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
                     cb,
                     ft.Image(src=v.thumbnail_url or "", width=80, height=45),
                     ft.Text(v.title, expand=True),
-                    ft.Text(v.duration or ""),
+                    ft.Text(format_duration(v.duration)),
                 ],
                 alignment=ft.MainAxisAlignment.START,
             )

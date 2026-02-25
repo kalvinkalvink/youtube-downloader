@@ -48,6 +48,20 @@ class ChannelInfo:
     videos: List[ChannelVideoInfo]
 
 
+def format_duration(seconds_str: str | None) -> str:
+    if not seconds_str:
+        return "Unknown"
+    try:
+        total_seconds = int(seconds_str)
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        if hours > 0:
+            return f"{hours}:{minutes:02d}:{seconds:02d}"
+        return f"{minutes}:{seconds:02d}"
+    except (ValueError, TypeError):
+        return "Unknown"
+
+
 def _run_yt_dlp(cmd: list[str]) -> str:
     result = subprocess.run(cmd, capture_output=True, text=True)
     if result.returncode != 0:

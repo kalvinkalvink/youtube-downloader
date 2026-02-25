@@ -76,6 +76,28 @@ class DownloadManager:
 
         self._notify_update()
 
+    def clear_completed_tasks(self) -> None:
+        with self._lock:
+            completed_ids = [
+                tid
+                for tid, task in self._tasks.items()
+                if task.status is DownloadStatus.COMPLETED
+            ]
+            for tid in completed_ids:
+                self._tasks.pop(tid, None)
+        self._notify_update()
+
+    def cancel_all_downloading(self) -> None:
+        with self._lock:
+            active_tasks = [
+                task
+                for task in self._tasks.values()
+                if task.status in (DownloadStatus.QUEUED, DownloadStatus.DOWNLOADING)
+            ]
+
+        for task in active_tasks:
+            self.cancel_task(task.id)
+
     def _worker_loop(self) -> None:
         while not self._stop_event.is_set():
             try:
