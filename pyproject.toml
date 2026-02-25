@@ -1,0 +1,13 @@
+[project]
+name = "youtube-downloader"
+version = "0.1.0"
+description = "YouTube Video Downloader GUI Application"
+requires-python = ">=3.12"
+dependencies = [
+    "flet>=0.80.5",
+    "yt-dlp>=2026.2.21",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*", "app.core*", "app.services*", "app.ui*", "app.ui.tabs*", "app.ui.widgets*", "app.validator*"]
