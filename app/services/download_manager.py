@@ -23,6 +23,7 @@ class DownloadManager:
         self._stop_event = threading.Event()
         self._on_update: Optional[UpdateCallback] = None
         self._running_processes: Dict[str, threading.Event] = {}
+        self._update_lock = threading.Lock()
 
         self._ensure_download_dir()
         self._start_workers()
@@ -37,7 +38,10 @@ class DownloadManager:
             self._workers.append(t)
 
     def _notify_update(self) -> None:
-        if self._on_update:
+        if not self._on_update:
+            return
+
+        with self._update_lock:
             self._on_update()
 
     def set_update_callback(self, callback: UpdateCallback) -> None:

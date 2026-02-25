@@ -9,11 +9,12 @@ from typing import Callable, Optional
 
 import yt_dlp
 
-ssl._create_default_https_context = ssl._create_unverified_context
-
 logger = logging.getLogger(__name__)
 PYTHON_VERSION = platform.python_version()
 YTDLP_VERSION = getattr(yt_dlp, "__version__", "unknown")
+SSL_DEFAULT_UNVERIFIED = (
+    ssl._create_default_https_context is ssl._create_unverified_context
+)
 
 from app.core.models import DownloadTask
 
@@ -149,6 +150,6 @@ class DownloadService:
                 type(e).__name__,
                 YTDLP_VERSION,
                 PYTHON_VERSION,
-                ssl._create_default_https_context is ssl._create_unverified_context,
+                SSL_DEFAULT_UNVERIFIED,
             )
             return False, f"Download error: {str(e)}"
