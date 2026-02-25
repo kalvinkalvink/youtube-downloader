@@ -101,11 +101,12 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
             return
 
         download_dir = Path(download_manager._settings.download_dir)
+        single_folder = download_dir / "single"
         task = DownloadTask.create(
             source_url=video_info.url,
             download_type=DownloadType.SINGLE_VIDEO,
             title=video_info.title,
-            target_path=download_dir,
+            target_path=single_folder,
             thumbnail_url=video_info.thumbnail_url,
             video_format=download_manager._settings.video_format,
             video_quality=download_manager._settings.video_quality,

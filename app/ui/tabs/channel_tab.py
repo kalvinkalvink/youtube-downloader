@@ -90,6 +90,7 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
             return
 
         download_dir = Path(download_manager._settings.download_dir)
+        channel_folder = download_dir / "channel" / channel_info.title
         for v, cb in zip(videos, video_checkboxes):
             if selected_only and not cb.value:
                 continue
@@ -97,7 +98,7 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
                 source_url=v.url,
                 download_type=DownloadType.CHANNEL_VIDEO,
                 title=v.title,
-                target_path=download_dir,
+                target_path=channel_folder,
                 thumbnail_url=v.thumbnail_url,
                 extra={"channel_title": channel_info.title},
                 video_format=download_manager._settings.video_format,

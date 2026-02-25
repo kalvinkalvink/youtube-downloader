@@ -82,6 +82,7 @@ def build_playlist_tab(page: ft.Page, download_manager: DownloadManager) -> ft.T
             return
 
         download_dir = Path(download_manager._settings.download_dir)
+        playlist_folder = download_dir / "playlist" / playlist_info.title
         for v, cb in zip(videos, video_checkboxes):
             if selected_only and not cb.value:
                 continue
@@ -89,7 +90,7 @@ def build_playlist_tab(page: ft.Page, download_manager: DownloadManager) -> ft.T
                 source_url=v.url,
                 download_type=DownloadType.PLAYLIST_VIDEO,
                 title=v.title,
-                target_path=download_dir,
+                target_path=playlist_folder,
                 thumbnail_url=v.thumbnail_url,
                 extra={"playlist_title": playlist_info.title},
             )
