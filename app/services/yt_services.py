@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import ssl
 import subprocess
 from dataclasses import dataclass
@@ -51,16 +52,18 @@ class ChannelInfo:
 
 def format_duration(seconds_str: str | None) -> str:
     if not seconds_str:
-        return "Unknown"
+        return "Not Found"
+    if ":" in seconds_str:
+        return seconds_str
     try:
-        total_seconds = int(seconds_str)
+        total_seconds = float(seconds_str)
         hours, remainder = divmod(total_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         if hours > 0:
-            return f"{hours}:{minutes:02d}:{seconds:02d}"
-        return f"{minutes}:{seconds:02d}"
+            return f"{int(hours)}:{int(minutes)}:{(seconds)}"
+        return f"{int(minutes)}:{int(seconds)}"
     except (ValueError, TypeError):
-        return "Unknown"
+        return "Failed to parse"
 
 
 def _run_yt_dlp(cmd: list[str]) -> str:
@@ -155,40 +158,30 @@ def fetch_channel_info(channel_url: str) -> ChannelInfo:
     cmd = [
         "yt-dlp",
         "--flat-playlist",
-        "--print",
-        "%(title)s",
-        "--print",
-        "%(id)s",
-        "--print",
-        "%(thumbnail)s",
-        "--print",
-        "%(duration)s",
+        "--dump-json",
         channel_url,
     ]
     stdout = _run_yt_dlp(cmd)
     lines = [line for line in stdout.splitlines() if line.strip()]
-    if len(lines) < 5:
+    if not lines:
         raise RuntimeError("Failed to parse channel information")
 
-    channel_title = lines[-1]
     videos: List[ChannelVideoInfo] = []
+    channel_title = None
 
-    for i in range(0, len(lines) - 1, 4):
-        if i + 3 >= len(lines) - 1:
-            break
-        title = lines[i]
-        vid = lines[i + 1]
-        thumbnail = lines[i + 2] or None
-        duration = lines[i + 3] if lines[i + 3] != "None" else None
-        url = f"https://www.youtube.com/watch?v={vid}"
+    for line in lines:
+        data = json.loads(line)
+        if channel_title is None:
+            channel_title = data.get("channel")
+
         videos.append(
             ChannelVideoInfo(
-                title=title,
-                video_id=vid,
-                url=url,
-                thumbnail_url=thumbnail,
-                duration=duration,
+                title=data.get("title", ""),
+                video_id=data.get("id", ""),
+                url=f"https://www.youtube.com/watch?v={data.get('id', '')}",
+                thumbnail_url=data['thumbnails'][-1].get("url"),
+                duration=str(data["duration"]),
             )
         )
 
-    return ChannelInfo(title=channel_title, url=channel_url, videos=videos)
+    return ChannelInfo(title=channel_title or "Unknown", url=channel_url, videos=videos)
