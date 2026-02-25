@@ -6,7 +6,7 @@ import flet as ft
 
 from app.core.models import DownloadTask, DownloadType
 from app.services.download_manager import DownloadManager
-from app.services.yt_services import VideoInfo, fetch_single_video_info
+from app.services.yt_services import VideoInfo, fetch_single_video_info, format_duration
 from app.validator.youtube_validator import YouTubeValidator
 
 
@@ -51,7 +51,7 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
         if video_info:
             thumbnail_image.src = video_info.thumbnail_url or ""
             title_text.value = video_info.title
-            duration_text.value = f"Duration: {video_info.duration or 'Unknown'}"
+            duration_text.value = f"Duration: {format_duration(video_info.duration)}"
             download_button.disabled = False
             placeholder_text.visible = False
             video_info_container.visible = True
