@@ -20,17 +20,50 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
     duration_text = ft.Text("")
     download_button = ft.ElevatedButton("Download", disabled=True)
 
+    placeholder_text = ft.Text(
+        "Enter a YouTube video URL and click 'Fetch video' to load video details.",
+        size=14,
+        color=ft.Colors.with_opacity(0.6, "black"),
+        text_align=ft.TextAlign.CENTER,
+    )
+    video_info_container = ft.Container(
+        content=ft.Column(
+            controls=[
+                thumbnail_image,
+                title_text,
+                duration_text,
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=10,
+        ),
+        alignment=ft.alignment.Alignment.CENTER,
+        padding=20,
+        visible=False,
+    )
+    download_button_container = ft.Container(
+        content=download_button,
+        alignment=ft.alignment.Alignment.CENTER,
+        padding=20,
+        visible=False,
+    )
+
     def refresh_video_view() -> None:
         if video_info:
             thumbnail_image.src = video_info.thumbnail_url or ""
             title_text.value = video_info.title
             duration_text.value = f"Duration: {video_info.duration or 'Unknown'}"
             download_button.disabled = False
+            placeholder_text.visible = False
+            video_info_container.visible = True
+            download_button_container.visible = True
         else:
             thumbnail_image.src = ""
             title_text.value = ""
             duration_text.value = ""
             download_button.disabled = True
+            placeholder_text.visible = True
+            video_info_container.visible = False
+            download_button_container.visible = False
         page.update()
 
     def on_fetch_click(e: ft.ControlEvent) -> None:
@@ -88,24 +121,9 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
         controls=[
             ft.Row(controls=[url_field, fetch_button]),
             status_text,
-            ft.Container(
-                content=ft.Column(
-                    controls=[
-                        thumbnail_image,
-                        title_text,
-                        duration_text,
-                    ],
-                    horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                    spacing=10,
-                ),
-                alignment="center",
-                padding=20,
-            ),
-            ft.Container(
-                content=download_button,
-                alignment="center",
-                padding=20,
-            ),
+            placeholder_text,
+            video_info_container,
+            download_button_container,
         ],
         expand=True,
         scroll=ft.ScrollMode.ALWAYS,
