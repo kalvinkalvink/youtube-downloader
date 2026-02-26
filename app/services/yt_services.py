@@ -6,6 +6,8 @@ import subprocess
 from dataclasses import dataclass
 from typing import List, Optional
 
+from yt_dlp import YoutubeDL
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 
@@ -167,12 +169,17 @@ def fetch_channel_info(channel_url: str) -> ChannelInfo:
         raise RuntimeError("Failed to parse channel information")
 
     videos: List[ChannelVideoInfo] = []
-    channel_title = None
+
+    ydl_opts = {
+        'playlist_items': '1',
+        'extract_flat': 'in_playlist',
+    }
+    with YoutubeDL(ydl_opts) as ydl:
+        channel_info = ydl.extract_info(channel_url, download=False)
+    channel_title = channel_info.get("channel", "Unknown")
 
     for line in lines:
         data = json.loads(line)
-        if channel_title is None:
-            channel_title = data.get("channel")
 
         videos.append(
             ChannelVideoInfo(
@@ -184,4 +191,4 @@ def fetch_channel_info(channel_url: str) -> ChannelInfo:
             )
         )
 
-    return ChannelInfo(title=channel_title or "Unknown", url=channel_url, videos=videos)
+    return ChannelInfo(title=channel_title, url=channel_url, videos=videos)

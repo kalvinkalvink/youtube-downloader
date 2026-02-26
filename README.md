@@ -65,11 +65,16 @@ downloads/
 
 ## Program Screenshots
 
-*Main Interface*
+*Playlist Video Download Tab*
+![Main Interface](screenshots/playlist.png)
 
-![Main Interface](screenshots/main.png)
+*Single Video Download Tab*
+![Main Interface](screenshots/single-video.png)
 
-*Downloading Videos*
+*Channel Video Download Tab*
+![Main Interface](screenshots/channel.png)
+
+*Download Manager*
 
 ![Downloads](screenshots/downloads.png)
 
