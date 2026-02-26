@@ -1,4 +1,5 @@
 # YouTube Downloader
+<a href="https://www.buymeacoffee.com/kalvinkalvink" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 A GUI application for downloading YouTube videos, playlists, and channel videos. Built with [Flet](https://flet.dev/) (Python UI framework) and [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
