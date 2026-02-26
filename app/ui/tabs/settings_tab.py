@@ -5,7 +5,7 @@ from pathlib import Path
 import flet as ft
 from flet import icons
 
-from app.core.settings import AppSettings, save_settings
+from app.core.settings import AppSettings, DEFAULT_DOWNLOAD_DIR, save_settings
 from app.services.download_manager import DownloadManager
 
 
@@ -79,7 +79,16 @@ def build_settings_tab(
         status_text.value = "Settings saved."
         page.update()
 
+    def on_reset(e: ft.ControlEvent) -> None:
+        concurrent_field.value = "4"
+        download_dir_field.value = DEFAULT_DOWNLOAD_DIR
+        format_dropdown.value = "mp4"
+        quality_dropdown.value = "best"
+        status_text.value = "Settings reset to defaults."
+        page.update()
+
     save_button = ft.ElevatedButton("Save settings", on_click=on_save)
+    reset_button = ft.ElevatedButton("Reset to Default", on_click=on_reset)
 
     page.services.append(file_picker)
 
@@ -100,7 +109,7 @@ def build_settings_tab(
             download_dir_row,
             format_dropdown,
             quality_dropdown,
-            save_button,
+            ft.Row(controls=[save_button, reset_button]),
             status_text,
         ],
         expand=True,
