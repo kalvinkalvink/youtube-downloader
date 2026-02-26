@@ -7,8 +7,18 @@ dependencies = [
     "flet>=0.80.5",
     "yt-dlp>=2026.2.21",
     "requests>=2.32.2",
+    "platformdirs>=4.9.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["app*", "app.core*", "app.services*", "app.ui*", "app.ui.tabs*", "app.ui.widgets*", "app.validator*"]
+include = [
+    "app*",
+    "app.assets*",
+    "app.core*",
+    "app.services*",
+    "app.ui*",
+    "app.ui.tabs*",
+    "app.ui.widgets*",
+    "app.validator*"
+]

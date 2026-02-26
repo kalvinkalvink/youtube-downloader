@@ -4,8 +4,12 @@ import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
+import platformdirs
 
-SETTINGS_FILE = Path("settings.json")
+
+SETTINGS_FILE = (
+    Path(platformdirs.user_config_dir("youtube-downloader")) / "settings.json"
+)
 
 
 @dataclass
@@ -32,4 +36,5 @@ def load_settings() -> AppSettings:
 
 
 def save_settings(settings: AppSettings) -> None:
+    SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
     SETTINGS_FILE.write_text(json.dumps(asdict(settings), indent=2), encoding="utf-8")
