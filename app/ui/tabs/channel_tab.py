@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 from typing import List
 
@@ -14,6 +15,8 @@ from app.services.yt_services import (
     format_duration,
 )
 from app.validator.youtube_validator import YouTubeValidator
+
+logger = logging.getLogger(__name__)
 
 
 def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Tab:
@@ -61,6 +64,7 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
         def worker() -> None:
             nonlocal videos, video_checkboxes, channel_info
             try:
+                logger.info("Fetching channel info url=%s", url)
                 info = fetch_channel_info(url)
                 channel_info = info
                 videos = info.videos
@@ -69,7 +73,13 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
                     f"Found {len(videos)} videos in channel '{info.title}'."
                 )
                 select_all_checkbox.disabled = False
+                logger.info(
+                    "Channel fetched successfully title=%s videos_count=%s",
+                    info.title,
+                    len(videos),
+                )
             except Exception as exc:
+                logger.exception("Failed to fetch channel url=%s", url)
                 status_text.value = f"Error: {exc}"
                 videos = []
                 video_checkboxes = []
@@ -91,6 +101,7 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
 
         download_dir = Path(download_manager._settings.download_dir)
         channel_folder = download_dir / "channel" / channel_info.title
+        task_count = 0
         for v, cb in zip(videos, video_checkboxes):
             if selected_only and not cb.value:
                 continue
@@ -105,6 +116,10 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
                 video_quality=download_manager._settings.video_quality,
             )
             download_manager.add_task(task)
+            task_count += 1
+        logger.info(
+            "Enqueued %s channel videos channel=%s", task_count, channel_info.title
+        )
         status_text.value = "Added selected videos to download queue."
         page.update()
 

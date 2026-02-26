@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 import subprocess
 
 import flet as ft
+
+from app.config.logging_config import setup_logging
 
 from app.services.download_manager import DownloadManager
 from app.core.settings import AppSettings, load_settings
@@ -28,6 +31,9 @@ def ensure_yt_dlp_available() -> str:
 
 
 def main(page: ft.Page) -> None:
+    setup_logging()
+    logger = logging.getLogger(__name__)
+    logger.info("Application starting")
     page.title = "YouTube Downloader"
     page.window_icon = "app/assets/icon.png"
     page.window_width = 1200

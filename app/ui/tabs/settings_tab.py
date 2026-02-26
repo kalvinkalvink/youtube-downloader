@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import flet as ft
@@ -7,6 +8,8 @@ from flet import icons
 
 from app.core.settings import AppSettings, DEFAULT_DOWNLOAD_DIR, save_settings
 from app.services.download_manager import DownloadManager
+
+logger = logging.getLogger(__name__)
 
 
 def build_settings_tab(
@@ -64,6 +67,9 @@ def build_settings_tab(
             if concurrent < 1:
                 raise ValueError
         except ValueError:
+            logger.error(
+                "Invalid concurrent downloads value: %s", concurrent_field.value
+            )
             status_text.value = "Concurrent downloads must be a positive integer."
             page.update()
             return
@@ -76,6 +82,13 @@ def build_settings_tab(
 
         save_settings(settings)
         download_manager.update_settings(settings)
+        logger.info(
+            "Settings saved: concurrent=%s download_dir=%s format=%s quality=%s",
+            settings.max_concurrent_downloads,
+            settings.download_dir,
+            settings.video_format,
+            settings.video_quality,
+        )
         status_text.value = "Settings saved."
         page.update()
 

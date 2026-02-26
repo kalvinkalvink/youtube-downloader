@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import queue
 import threading
 from pathlib import Path
@@ -8,6 +9,8 @@ from typing import Callable, Dict, List, Optional
 from app.core.models import DownloadStatus, DownloadTask
 from app.core.settings import AppSettings
 from app.services.download_service import DownloadService
+
+logger = logging.getLogger(__name__)
 
 
 UpdateCallback = Callable[[], None]
@@ -51,6 +54,7 @@ class DownloadManager:
         with self._lock:
             self._tasks[task.id] = task
             self._queue.put(task.id)
+        logger.info("Task added task_id=%s url=%s", task.id, task.source_url)
         self._notify_update()
 
     def get_tasks(self) -> List[DownloadTask]:
@@ -73,7 +77,7 @@ class DownloadManager:
         cancel_event = self._running_processes.get(task_id)
         if cancel_event:
             cancel_event.set()
-
+        logger.info("Task cancelled task_id=%s", task_id)
         self._notify_update()
 
     def clear_completed_tasks(self) -> None:
@@ -85,6 +89,8 @@ class DownloadManager:
             ]
             for tid in completed_ids:
                 self._tasks.pop(tid, None)
+        if completed_ids:
+            logger.info("Cleared completed tasks count=%s", len(completed_ids))
         self._notify_update()
 
     def cancel_all_downloading(self) -> None:
@@ -137,12 +143,18 @@ class DownloadManager:
                         continue
                     if cancel_event.is_set():
                         task.mark_status(DownloadStatus.CANCELED)
+                        logger.info("Download cancelled task_id=%s", task_id)
                     elif success:
                         task.progress = 100.0
                         task.mark_status(DownloadStatus.COMPLETED)
+                        logger.info("Download completed task_id=%s", task_id)
                     else:
                         task.mark_status(DownloadStatus.FAILED, error=error)
+                        logger.error(
+                            "Download failed task_id=%s error=%s", task_id, error
+                        )
             except Exception as exc:
+                logger.exception("Unexpected error in worker task_id=%s", task_id)
                 with self._lock:
                     task = self._tasks.get(task_id)
                     if task:

@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import logging
+
 import flet as ft
 
 from app.core.models import DownloadStatus, DownloadTask
 from app.services.download_manager import DownloadManager
+
+logger = logging.getLogger(__name__)
 
 
 def build_download_manager_tab(
@@ -75,9 +79,11 @@ def build_download_manager_tab(
     refresh()
 
     def on_clear_completed(e: ft.BaseControl) -> None:
+        logger.info("Clearing completed tasks from download manager")
         download_manager.clear_completed_tasks()
 
     def on_cancel_all(e: ft.BaseControl) -> None:
+        logger.info("Cancelling all active downloads")
         download_manager.cancel_all_downloading()
 
     clear_completed_btn = ft.TextButton(

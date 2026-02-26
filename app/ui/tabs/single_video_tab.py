@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from pathlib import Path
 
 import flet as ft
@@ -8,6 +9,8 @@ from app.core.models import DownloadTask, DownloadType
 from app.services.download_manager import DownloadManager
 from app.services.yt_services import VideoInfo, fetch_single_video_info, format_duration
 from app.validator.youtube_validator import YouTubeValidator
+
+logger = logging.getLogger(__name__)
 
 
 def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Tab:
@@ -86,10 +89,13 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
         def worker() -> None:
             nonlocal video_info
             try:
+                logger.info("Fetching video info url=%s", url)
                 info = fetch_single_video_info(url)
                 video_info = info
                 status_text.value = f"Found video: {info.title}"
+                logger.info("Video fetched successfully title=%s", info.title)
             except Exception as exc:
+                logger.exception("Failed to fetch video url=%s", url)
                 status_text.value = f"Error: {exc}"
                 video_info = None
             refresh_video_view()
@@ -112,6 +118,7 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
             video_quality=download_manager._settings.video_quality,
         )
         download_manager.add_task(task)
+        logger.info("Single video added to download queue title=%s", video_info.title)
         status_text.value = "Added to download queue."
         page.update()
 
