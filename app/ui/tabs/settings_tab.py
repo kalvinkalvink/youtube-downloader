@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import flet as ft
+from flet import icons
 
 from app.core.settings import AppSettings, save_settings
 from app.services.download_manager import DownloadManager
@@ -21,6 +22,14 @@ def build_settings_tab(
         value=settings.download_dir,
         expand=True,
     )
+
+    file_picker = ft.FilePicker()
+
+    async def on_browse_folder(e: ft.ControlEvent) -> None:
+        path = await file_picker.get_directory_path()
+        if path:
+            download_dir_field.value = path
+            page.update()
 
     format_dropdown = ft.Dropdown(
         label="Video Format",
@@ -72,10 +81,23 @@ def build_settings_tab(
 
     save_button = ft.ElevatedButton("Save settings", on_click=on_save)
 
+    page.services.append(file_picker)
+
+    download_dir_row = ft.Row(
+        controls=[
+            download_dir_field,
+            ft.IconButton(
+                icon=icons.Icons.FOLDER_OPEN,
+                on_click=on_browse_folder,
+                tooltip="Browse folder",
+            ),
+        ]
+    )
+
     content = ft.Column(
         controls=[
             concurrent_field,
-            download_dir_field,
+            download_dir_row,
             format_dropdown,
             quality_dropdown,
             save_button,
