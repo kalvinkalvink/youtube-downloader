@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "YouTube Video Downloader GUI Application"
 requires-python = ">=3.12"
 dependencies = [
-    "flet>=0.80.5",
     "yt-dlp>=2026.2.21",
     "requests>=2.32.2",
     "platformdirs>=4.9.0",
+    "flet[all]>=0.81.0",
 ]
 
 [tool.setuptools.packages.find]
