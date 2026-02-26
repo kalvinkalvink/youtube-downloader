@@ -66,21 +66,21 @@ downloads/
 ## Program Screenshots
 
 *Playlist Video Download Tab*
-![Main Interface](screenshots/playlist.png)
+![Main Interface](app/assets/screenshots/playlist.png)
 
 *Single Video Download Tab*
-![Main Interface](screenshots/single-video.png)
+![Main Interface](app/assets/screenshots/single-video.png)
 
 *Channel Video Download Tab*
-![Main Interface](screenshots/channel.png)
+![Main Interface](app/assets/screenshots/channel.png)
 
 *Download Manager*
 
-![Downloads](screenshots/downloads.png)
+![Downloads](app/assets/screenshots/downloads.png)
 
 *Settings*
 
-![Settings](screenshots/settings.png)
+![Settings](app/assets/screenshots/settings.png)
 
 ## Configuration
 
@@ -92,3 +92,18 @@ Access the Settings tab to configure:
 | Concurrent downloads | Number of simultaneous downloads | `3` |
 | Video format | Output format (MP4, WebM, MP3, M4A) | `mp4` |
 | Video quality | Resolution preference (Best, 1080p, 720p, 480p, Audio only) | `best` |
+
+
+## Build
+### Window
+```bash
+flet build windows
+```
+### Linux
+```bash
+flet build linux
+```
+### MacOS
+```bash
+flet build macos
+```

@@ -29,6 +29,7 @@ def ensure_yt_dlp_available() -> str:
 
 def main(page: ft.Page) -> None:
     page.title = "YouTube Downloader"
+    page.window_icon = "app/assets/icon.png"
     page.window_width = 1200
     page.window_height = 800
 
@@ -65,7 +66,11 @@ def main(page: ft.Page) -> None:
             content_container.content = settings_tab.content
 
         for i, btn in enumerate(buttons):
-            btn.style = ft.ButtonStyle(bgcolor=ft.Colors.PRIMARY, color=ft.Colors.WHITE) if i == index else None
+            btn.style = (
+                ft.ButtonStyle(bgcolor=ft.Colors.PRIMARY, color=ft.Colors.WHITE)
+                if i == index
+                else None
+            )
 
         current_index = index
         page.update()
@@ -89,6 +94,7 @@ def main(page: ft.Page) -> None:
 
     page.add(ft.Column(controls=[buttons_row, content_container], expand=True))
     switch_view(0)
+
 
 if __name__ == "__main__":
     ft.run(main)
