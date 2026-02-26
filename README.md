@@ -17,19 +17,18 @@ A GUI application for downloading YouTube videos, playlists, and channel videos.
 - Clear completed downloads from queue
 - Auto-organized folder structure by download type
 
-## Installation
 
+## Install UV
+[Official UV Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)
+
+## Clone repo
 ```bash
 # Clone the repository
 git clone https://github.com/kalvinkalvink/youtube-downloader.git
 cd youtube-downloader
-
-# Install dependencies
-pip install flet yt-dlp requests
 ```
 
-Or using [uv](https://github.com/astral-sh/uv):
-
+## Sync dependency
 ```bash
 uv sync
 ```
@@ -42,15 +41,9 @@ uv sync
 ## Usage
 
 ```bash
-python -m app.main
+uv run python main.py
 ```
 
-Or:
-
-```bash
-cd app
-python main.py
-```
 
 ## Download Folder Structure
 
@@ -70,7 +63,7 @@ downloads/
     └── video2.mp4
 ```
 
-## Screenshots
+## Program Screenshots
 
 *Main Interface*
 
@@ -94,7 +87,3 @@ Access the Settings tab to configure:
 | Concurrent downloads | Number of simultaneous downloads | `3` |
 | Video format | Output format (MP4, WebM, MP3, M4A) | `mp4` |
 | Video quality | Resolution preference (Best, 1080p, 720p, 480p, Audio only) | `best` |
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
