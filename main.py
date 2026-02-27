@@ -9,6 +9,7 @@ from app.config.logging_config import setup_logging
 from app.services.download_manager import DownloadManager
 from app.core.settings import AppSettings, load_settings
 from app.ui.tabs.download_manager_tab import build_download_manager_tab
+from app.ui.tabs.multi_video_tab import build_multi_video_tab
 from app.ui.tabs.playlist_tab import build_playlist_tab
 from app.ui.tabs.settings_tab import build_settings_tab
 from app.ui.tabs.single_video_tab import build_single_video_tab
@@ -29,6 +30,7 @@ def main(page: ft.Page) -> None:
 
     playlist_tab = build_playlist_tab(page, download_manager)
     single_tab = build_single_video_tab(page, download_manager)
+    multi_video_tab = build_multi_video_tab(page, download_manager)
     channel_tab = build_channel_tab(page, download_manager)
     downloads_tab = build_download_manager_tab(page, download_manager)
     settings_tab = build_settings_tab(page, settings, download_manager)
@@ -43,10 +45,12 @@ def main(page: ft.Page) -> None:
         elif index == 1:
             content_container.content = single_tab.content
         elif index == 2:
-            content_container.content = channel_tab.content
+            content_container.content = multi_video_tab.content
         elif index == 3:
-            content_container.content = downloads_tab.content
+            content_container.content = channel_tab.content
         elif index == 4:
+            content_container.content = downloads_tab.content
+        elif index == 5:
             content_container.content = settings_tab.content
 
         for i, btn in enumerate(buttons):
@@ -65,11 +69,19 @@ def main(page: ft.Page) -> None:
         style=ft.ButtonStyle(color=ft.Colors.PRIMARY),
     )
     single_btn = ft.TextButton("Single Video", on_click=lambda e: switch_view(1))
-    channel_btn = ft.TextButton("Channel", on_click=lambda e: switch_view(2))
-    downloads_btn = ft.TextButton("Downloads", on_click=lambda e: switch_view(3))
-    settings_btn = ft.TextButton("Settings", on_click=lambda e: switch_view(4))
+    multi_video_btn = ft.TextButton("Multi Video", on_click=lambda e: switch_view(2))
+    channel_btn = ft.TextButton("Channel", on_click=lambda e: switch_view(3))
+    downloads_btn = ft.TextButton("Downloads", on_click=lambda e: switch_view(4))
+    settings_btn = ft.TextButton("Settings", on_click=lambda e: switch_view(5))
 
-    buttons = [playlist_btn, single_btn, channel_btn, downloads_btn, settings_btn]
+    buttons = [
+        playlist_btn,
+        single_btn,
+        multi_video_btn,
+        channel_btn,
+        downloads_btn,
+        settings_btn,
+    ]
 
     buttons_row = ft.Row(
         controls=buttons,
