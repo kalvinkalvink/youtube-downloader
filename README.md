@@ -37,7 +37,6 @@ uv sync
 ## Requirements
 
 - Python 3.12 or higher
-- [yt-dlp](https://github.com/yt-dlp/yt-dlp) (must be installed and on PATH)
 
 ## Usage
 
@@ -96,15 +95,38 @@ Access the Settings tab to configure:
 
 
 ## Build
-### Window
+
+The build process automatically downloads FFmpeg for video merging.
+
+### Build Commands
+
+#### Windows
 ```bash
-flet build windows
+build.bat
 ```
-### Linux
+
+This will:
+1. Download the latest FFmpeg automatically (~87 MB)
+2. Build the Windows app using `flet build windows`
+3. Copy FFmpeg to the build output folder
+
+The final output will be in:
+```
+build/youtube-video-downloader-windows-v1.1/
+├── youtube-downloader.exe
+├── ffmpeg.exe    <-- bundled automatically
+└── ...
+```
+
+#### Linux
 ```bash
 flet build linux
 ```
-### MacOS
+
+#### MacOS
 ```bash
 flet build macos
 ```
+
+### FFmpeg Note
+FFmpeg is required for merging video and audio streams (best, 1080p, 720p, 480p quality). Without FFmpeg, you can still download using "Audio only" quality.

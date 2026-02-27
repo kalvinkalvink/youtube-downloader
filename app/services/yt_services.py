@@ -1,17 +1,21 @@
 from __future__ import annotations
 
-import json
 import logging
 import ssl
-import subprocess
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 from yt_dlp import YoutubeDL
 
 logger = logging.getLogger(__name__)
 
 ssl._create_default_https_context = ssl._create_unverified_context
+
+YDL_OPTS: Dict[str, Any] = {
+    "quiet": True,
+    "no_warnings": True,
+    "extract_flat": False,
+}
 
 
 @dataclass
@@ -55,29 +59,22 @@ class ChannelInfo:
     videos: List[ChannelVideoInfo]
 
 
-def format_duration(seconds_str: str | None) -> str:
-    if not seconds_str:
+def format_duration(seconds_val: int | str | None) -> str:
+    if seconds_val is None or (
+        isinstance(seconds_val, str) and (not seconds_val or seconds_val == "None")
+    ):
         return "Not Found"
-    if ":" in seconds_str:
-        return seconds_str
+    if isinstance(seconds_val, str) and ":" in seconds_val:
+        return seconds_val
     try:
-        total_seconds = float(seconds_str)
+        total_seconds = float(seconds_val)
         hours, remainder = divmod(total_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         if hours > 0:
             return f"{int(hours)}:{int(minutes)}:{(seconds)}"
         return f"{int(minutes)}:{int(seconds)}"
     except (ValueError, TypeError):
-        return "Failed to parse"
-
-
-def _run_yt_dlp(cmd: list[str]) -> str:
-    result = subprocess.run(
-        cmd, capture_output=True, encoding="utf-8", errors="replace"
-    )
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or "yt-dlp failed")
-    return result.stdout
+        return "Not Found"
 
 
 def fetch_playlist_info(playlist_url: str) -> PlaylistInfo:
@@ -85,45 +82,28 @@ def fetch_playlist_info(playlist_url: str) -> PlaylistInfo:
     Use yt-dlp to fetch playlist info, including thumbnail URLs.
     """
     logger.info("Fetching playlist info url=%s", playlist_url)
-    cmd = [
-        "yt-dlp",
-        "--flat-playlist",
-        "--print",
-        "%(title)s",
-        "--print",
-        "%(id)s",
-        "--print",
-        "%(thumbnail)s",
-        "--print",
-        "%(duration)s",
-        "--print",
-        "%(playlist_title)s",
-        playlist_url,
-    ]
     try:
-        stdout = _run_yt_dlp(cmd)
-        lines = [line for line in stdout.splitlines() if line.strip()]
-        if len(lines) < 4:
-            raise RuntimeError("Failed to parse playlist information")
+        ydl_opts = {**YDL_OPTS, "extract_flat": "in_playlist"}
+        with YoutubeDL(ydl_opts) as ydl:
+            playlist_data = ydl.extract_info(playlist_url, download=False)
 
-        playlist_title = lines[-1]
+        if not playlist_data:
+            raise RuntimeError("Failed to fetch playlist information")
+
+        playlist_title = playlist_data.get("title", "Unknown Playlist")
+        entries = playlist_data.get("entries", [])
+
         videos: List[PlaylistVideoInfo] = []
-
-        # Groups of 4 lines (title, id, thumbnail, duration) per video, last line is playlist title
-        for i in range(0, len(lines) - 1, 5):
-            title = lines[i]
-            vid = lines[i + 1]
-            thumbnail = lines[i + 2] or None
-            duration = lines[i + 3] if lines[i + 3] != "None" else None
-            playlist_title = lines[i + 4] or None
-            url = f"https://www.youtube.com/watch?v={vid}"
+        for entry in entries:
+            if entry is None:
+                continue
             videos.append(
                 PlaylistVideoInfo(
-                    title=title,
-                    video_id=vid,
-                    url=url,
-                    thumbnail_url=thumbnail,
-                    duration=duration,
+                    title=entry.get("title", "Unknown"),
+                    video_id=entry.get("id", ""),
+                    url=f"https://www.youtube.com/watch?v={entry.get('id', '')}",
+                    thumbnail_url=entry.get("thumbnails")[-1]['url'],
+                    duration=format_duration(entry.get("duration")),
                 )
             )
 
@@ -133,84 +113,68 @@ def fetch_playlist_info(playlist_url: str) -> PlaylistInfo:
             len(videos),
         )
         return PlaylistInfo(title=playlist_title, url=playlist_url, videos=videos)
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to fetch playlist url=%s", playlist_url)
         raise
 
 
 def fetch_single_video_info(video_url: str) -> VideoInfo:
     logger.info("Fetching single video info url=%s", video_url)
-    cmd = [
-        "yt-dlp",
-        "--print",
-        "%(title)s",
-        "--print",
-        "%(id)s",
-        "--print",
-        "%(thumbnail)s",
-        "--print",
-        "%(duration)s",
-        video_url,
-    ]
     try:
-        stdout = _run_yt_dlp(cmd)
-        lines = [line for line in stdout.splitlines() if line.strip()]
-        if len(lines) < 4:
-            raise RuntimeError("Failed to parse video information")
+        with YoutubeDL(YDL_OPTS) as ydl:
+            video_data = ydl.extract_info(video_url, download=False)
 
-        title = lines[0]
-        vid = lines[1]
-        thumbnail = lines[2] or None
-        duration = lines[3] if lines[3] != "None" else None
-        url = f"https://www.youtube.com/watch?v={vid}"
+        if not video_data:
+            raise RuntimeError("Failed to fetch video information")
+
+        title = video_data.get("title", "Unknown")
+        video_id = video_data.get("id", "")
+        thumbnail = video_data.get("thumbnail")
+        duration = video_data.get("duration")
+        url = f"https://www.youtube.com/watch?v={video_id}"
 
         logger.info("Single video fetched successfully title=%s", title)
         return VideoInfo(
             title=title,
-            video_id=vid,
+            video_id=video_id,
             url=url,
             thumbnail_url=thumbnail,
-            duration=duration,
+            duration=format_duration(duration),
         )
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to fetch single video url=%s", video_url)
         raise
 
 
 def fetch_channel_info(channel_url: str) -> ChannelInfo:
     logger.info("Fetching channel info url=%s", channel_url)
-    cmd = [
-        "yt-dlp",
-        "--flat-playlist",
-        "--dump-json",
-        channel_url,
-    ]
     try:
-        stdout = _run_yt_dlp(cmd)
-        lines = [line for line in stdout.splitlines() if line.strip()]
-        if not lines:
-            raise RuntimeError("Failed to parse channel information")
+        ydl_opts = {**YDL_OPTS, "extract_flat": "in_playlist"}
+        with YoutubeDL(ydl_opts) as ydl:
+            channel_data = ydl.extract_info(channel_url, download=False)
+
+        if not channel_data:
+            raise RuntimeError("Failed to fetch channel information")
+
+        channel_title = channel_data.get("channel") or channel_data.get(
+            "title", "Unknown Channel"
+        )
+        entries = channel_data.get("entries", [])
 
         videos: List[ChannelVideoInfo] = []
-
-        ydl_opts = {
-            "playlist_items": "1",
-            "extract_flat": "in_playlist",
-        }
-        with YoutubeDL(ydl_opts) as ydl:
-            channel_info = ydl.extract_info(channel_url, download=False)
-        channel_title = channel_info.get("channel", "Unknown")
-
-        for line in lines:
-            data = json.loads(line)
+        for entry in entries:
+            if entry is None:
+                continue
+            thumbnails = entry.get("thumbnails", [])
+            thumbnail_url = thumbnails[-1].get("url") if thumbnails else None
 
             videos.append(
                 ChannelVideoInfo(
-                    title=data.get("title", ""),
-                    video_id=data.get("id", ""),
-                    url=f"https://www.youtube.com/watch?v={data.get('id', '')}",
-                    thumbnail_url=data["thumbnails"][-1].get("url"),
-                    duration=str(data["duration"]),
+                    title=entry.get("title", "Unknown"),
+                    video_id=entry.get("id", ""),
+                    url=f"https://www.youtube.com/watch?v={entry.get('id', '')}",
+                    thumbnail_url=thumbnail_url,
+                    duration=format_duration(entry.get("duration")),
                 )
             )
 
@@ -220,6 +184,6 @@ def fetch_channel_info(channel_url: str) -> ChannelInfo:
             len(videos),
         )
         return ChannelInfo(title=channel_title, url=channel_url, videos=videos)
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to fetch channel url=%s", channel_url)
         raise

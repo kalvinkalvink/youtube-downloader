@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import logging
-import subprocess
 
 import flet as ft
 
@@ -16,20 +15,6 @@ from app.ui.tabs.single_video_tab import build_single_video_tab
 from app.ui.tabs.channel_tab import build_channel_tab
 
 
-def ensure_yt_dlp_available() -> str:
-    try:
-        result = subprocess.run(
-            ["yt-dlp", "--version"],
-            capture_output=True,
-            text=True,
-        )
-        if result.returncode != 0:
-            return "yt-dlp is not available. Please install it (pip install yt-dlp)."
-        return ""
-    except FileNotFoundError:
-        return "yt-dlp command not found. Please install it and ensure it is on PATH."
-
-
 def main(page: ft.Page) -> None:
     setup_logging()
     logger = logging.getLogger(__name__)
@@ -38,13 +23,6 @@ def main(page: ft.Page) -> None:
     page.window_icon = "app/assets/icon.png"
     page.window_width = 1200
     page.window_height = 800
-
-    err = ensure_yt_dlp_available()
-    if err:
-        dlg = ft.AlertDialog(title=ft.Text("yt-dlp missing"), content=ft.Text(err))
-        page.dialog = dlg
-        dlg.open = True
-        page.update()
 
     settings: AppSettings = load_settings()
     download_manager = DownloadManager(settings=settings)

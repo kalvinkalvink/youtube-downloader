@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import logging
+import platformdirs
 import sys
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
-LOG_DIR = Path(__file__).parent.parent / "logs"
+LOG_DIR = Path(platformdirs.user_log_dir("youtube-downloader"))
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 APP_LOG_FILE = LOG_DIR / "app.log"

@@ -4,7 +4,9 @@ import logging
 import os
 import platform
 import ssl
+import sys
 import threading
+from pathlib import Path
 from typing import Callable, Optional
 
 import yt_dlp
@@ -17,6 +19,21 @@ SSL_DEFAULT_UNVERIFIED = (
 )
 
 from app.core.models import DownloadTask
+
+
+def get_ffmpeg_location() -> str | None:
+    if getattr(sys, "frozen", False):
+        app_dir = Path(sys.executable).parent
+        ffmpeg_path = app_dir / "ffmpeg.exe"
+        if ffmpeg_path.exists():
+            return str(app_dir)
+        return None
+    else:
+        bin_dir = Path(__file__).parent.parent.parent / "bin"
+        ffmpeg_path = bin_dir / "ffmpeg.exe"
+        if ffmpeg_path.exists():
+            return str(bin_dir)
+        return None
 
 
 ProgressCallback = Callable[[float], None]
@@ -100,6 +117,13 @@ class DownloadService:
             "no_warnings": True,
             "progress_hooks": [],
         }
+
+        ffmpeg_location = get_ffmpeg_location()
+        if ffmpeg_location:
+            ydl_opts["ffmpeg_location"] = ffmpeg_location
+            logger.info("Using ffmpeg from: %s", ffmpeg_location)
+        else:
+            logger.warning("ffmpeg not found - video merging may fail")
 
         format_opts = DownloadService.build_format_options(
             task.video_format, task.video_quality
