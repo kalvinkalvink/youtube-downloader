@@ -75,7 +75,13 @@ def build_download_manager_tab(
         status_text.value = f"{len(table.rows)} tasks in queue/history."
         page.update()
 
-    download_manager.set_update_callback(refresh)
+    def schedule_refresh() -> None:
+        def do_refresh():
+            refresh()
+
+        page.run_thread(do_refresh)
+
+    download_manager.set_update_callback(schedule_refresh)
     refresh()
 
     def on_clear_completed(e: ft.BaseControl) -> None:

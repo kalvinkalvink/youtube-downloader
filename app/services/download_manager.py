@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import queue
 import threading
+import time
 from pathlib import Path
 from typing import Callable, Dict, List, Optional
 
@@ -27,9 +28,13 @@ class DownloadManager:
         self._on_update: Optional[UpdateCallback] = None
         self._running_processes: Dict[str, threading.Event] = {}
         self._update_lock = threading.Lock()
+        self._last_update_time = 0.0
+        self._update_interval = 0.5
+        self._pending_update = False
 
         self._ensure_download_dir()
         self._start_workers()
+        self._start_update_notifier()
 
     def _ensure_download_dir(self) -> None:
         Path(self._settings.download_dir).mkdir(parents=True, exist_ok=True)
@@ -40,12 +45,47 @@ class DownloadManager:
             t.start()
             self._workers.append(t)
 
+    def _start_update_notifier(self) -> None:
+        def notifier_loop() -> None:
+            while not self._stop_event.is_set():
+                time.sleep(0.1)
+                should_notify = False
+                with self._update_lock:
+                    if self._pending_update:
+                        current_time = time.monotonic()
+                        if (
+                            current_time - self._last_update_time
+                            >= self._update_interval
+                        ):
+                            self._last_update_time = current_time
+                            self._pending_update = False
+                            should_notify = True
+                if should_notify and self._on_update:
+                    self._on_update()
+
+        t = threading.Thread(target=notifier_loop, daemon=True)
+        t.start()
+
     def _notify_update(self) -> None:
         if not self._on_update:
             return
 
         with self._update_lock:
-            self._on_update()
+            current_time = time.monotonic()
+            if current_time - self._last_update_time >= self._update_interval:
+                self._last_update_time = current_time
+                self._on_update()
+            else:
+                self._pending_update = True
+
+    def _notify_update_immediate(self) -> None:
+        if not self._on_update:
+            return
+
+        with self._update_lock:
+            self._last_update_time = time.monotonic()
+            self._pending_update = False
+        self._on_update()
 
     def set_update_callback(self, callback: UpdateCallback) -> None:
         self._on_update = callback
@@ -161,7 +201,7 @@ class DownloadManager:
                         task.mark_status(DownloadStatus.FAILED, error=str(exc))
             finally:
                 self._running_processes.pop(task_id, None)
-                self._notify_update()
+                self._notify_update_immediate()
                 self._queue.task_done()
 
     def stop(self) -> None:
