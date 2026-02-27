@@ -58,6 +58,9 @@ downloads/
 ├── channel/
 │   └── Channel Name/
 │       └── video1.mp4
+├── multi/
+│   ├── video1.mp4
+│   └── video2.mp4
 └── single/
     ├── video1.mp4
     └── video2.mp4
@@ -71,15 +74,16 @@ downloads/
 *Single Video Download Tab*
 ![Main Interface](app/assets/screenshots/single-video.png)
 
+*Multi Video Download Tab*
+![Main Interface](app/assets/screenshots/multi-video.png)
+
 *Channel Video Download Tab*
 ![Main Interface](app/assets/screenshots/channel.png)
 
 *Download Manager*
-
 ![Downloads](app/assets/screenshots/downloads.png)
 
 *Settings*
-
 ![Settings](app/assets/screenshots/settings.png)
 
 ## Configuration
