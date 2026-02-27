@@ -10,6 +10,7 @@ set APP_NAME=youtube-downloader
 REM Read version from pyproject.toml
 for /f "tokens=2 delims==" %%v in ('findstr /r "^version *=" "%~dp0pyproject.toml"') do set "APP_VERSION=%%v"
 set "APP_VERSION=%APP_VERSION:"=%"
+set "APP_VERSION=%APP_VERSION: =%"
 
 
 if not defined APP_VERSION (
