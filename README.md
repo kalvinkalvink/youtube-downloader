@@ -106,16 +106,21 @@ build.bat
 ```
 
 This will:
-1. Download the latest FFmpeg automatically (~87 MB)
-2. Build the Windows app using `flet build windows`
-3. Copy FFmpeg to the build output folder
+1. Check if running in CMD.exe (required)
+2. Download the latest FFmpeg automatically (~87 MB)
+3. Build the Windows app using `flet build windows`
+4. Copy FFmpeg to the build output folder
+5. Rename folder with version number
+6. Create a ZIP file for distribution
 
 The final output will be in:
 ```
-build/youtube-video-downloader-windows-v1.1/
-├── youtube-downloader.exe
-├── ffmpeg.exe    <-- bundled automatically
-└── ...
+build/
+├── youtube-downloader-v0.1.0/
+│   ├── youtube-downloader.exe
+│   ├── ffmpeg.exe    <-- bundled automatically
+│   └── ...
+└── youtube-downloader-v0.1.0.zip    <-- ready to distribute!
 ```
 
 #### Linux
