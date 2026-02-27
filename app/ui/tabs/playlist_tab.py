@@ -20,14 +20,6 @@ logger = logging.getLogger(__name__)
 
 
 def build_playlist_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Tab:
-    url_field = ft.TextField(label="YouTube playlist URL", expand=True)
-    status_text = ft.Text("")
-    videos: List[PlaylistVideoInfo] = []
-    video_checkboxes: List[ft.Checkbox] = []
-    playlist_info: PlaylistInfo | None = None
-
-    videos_column = ft.Column(scroll=ft.ScrollMode.ALWAYS, expand=True)
-
     def refresh_videos_view() -> None:
         videos_column.controls.clear()
         for v, cb in zip(videos, video_checkboxes):
@@ -118,6 +110,18 @@ def build_playlist_tab(page: ft.Page, download_manager: DownloadManager) -> ft.T
 
     def on_download_selected(e: ft.ControlEvent) -> None:
         enqueue_tasks(selected_only=True)
+
+    url_field = ft.TextField(
+        label="YouTube playlist URL", expand=True, on_submit=on_fetch_click
+    )
+    status_text = ft.Text("")
+    videos: List[PlaylistVideoInfo] = []
+    video_checkboxes: List[ft.Checkbox] = []
+    playlist_info: PlaylistInfo | None = None
+
+    videos_column = ft.Column(scroll=ft.ScrollMode.ALWAYS, expand=True)
+
+
 
     fetch_button = ft.ElevatedButton("Fetch playlist", on_click=on_fetch_click)
     download_all_button = ft.ElevatedButton("Download all", on_click=on_download_all)

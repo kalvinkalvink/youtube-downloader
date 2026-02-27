@@ -20,30 +20,6 @@ logger = logging.getLogger(__name__)
 
 
 def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Tab:
-    url_field = ft.TextField(label="YouTube channel URL", expand=True)
-    status_text = ft.Text("")
-    videos: List[ChannelVideoInfo] = []
-    video_checkboxes: List[ft.Checkbox] = []
-    channel_info: ChannelInfo | None = None
-    select_all_checkbox = ft.Checkbox(label="Select All", value=True, disabled=True)
-
-    videos_column = ft.Column(scroll=ft.ScrollMode.ALWAYS, expand=True)
-
-    def refresh_videos_view() -> None:
-        videos_column.controls.clear()
-        for v, cb in zip(videos, video_checkboxes):
-            row = ft.Row(
-                controls=[
-                    cb,
-                    ft.Image(src=v.thumbnail_url or "", width=80, height=45),
-                    ft.Text(v.title, expand=True),
-                    ft.Text(format_duration(v.duration)),
-                ],
-                alignment=ft.MainAxisAlignment.START,
-            )
-            videos_column.controls.append(row)
-        page.update()
-
     def on_fetch_click(e: ft.ControlEvent) -> None:
         nonlocal videos, video_checkboxes, channel_info
         url = url_field.value.strip()
@@ -88,6 +64,22 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
 
         page.run_thread(worker)
 
+    def refresh_videos_view() -> None:
+        videos_column.controls.clear()
+        for v, cb in zip(videos, video_checkboxes):
+            row = ft.Row(
+                controls=[
+                    cb,
+                    ft.Image(src=v.thumbnail_url or "", width=80, height=45),
+                    ft.Text(v.title, expand=True),
+                    ft.Text(format_duration(v.duration)),
+                ],
+                alignment=ft.MainAxisAlignment.START,
+            )
+            videos_column.controls.append(row)
+        page.update()
+
+
     def on_select_all_changed(e: ft.ControlEvent) -> None:
         for cb in video_checkboxes:
             cb.value = select_all_checkbox.value
@@ -128,6 +120,19 @@ def build_channel_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Ta
 
     def on_download_selected(e: ft.ControlEvent) -> None:
         enqueue_tasks(selected_only=True)
+
+    url_field = ft.TextField(
+        label="YouTube channel URL", expand=True, on_submit=on_fetch_click
+    )
+    status_text = ft.Text("")
+    videos: List[ChannelVideoInfo] = []
+    video_checkboxes: List[ft.Checkbox] = []
+    channel_info: ChannelInfo | None = None
+    select_all_checkbox = ft.Checkbox(label="Select All", value=True, disabled=True)
+
+    videos_column = ft.Column(scroll=ft.ScrollMode.ALWAYS, expand=True)
+
+
 
     fetch_button = ft.ElevatedButton("Fetch channel", on_click=on_fetch_click)
     download_all_button = ft.ElevatedButton("Download all", on_click=on_download_all)

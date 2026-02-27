@@ -14,42 +14,6 @@ logger = logging.getLogger(__name__)
 
 
 def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> ft.Tab:
-    url_field = ft.TextField(label="YouTube video URL", expand=True)
-    status_text = ft.Text("")
-    video_info: VideoInfo | None = None
-
-    thumbnail_image = ft.Image(width=320, height=180, src="")
-    title_text = ft.Text("", size=18, weight=ft.FontWeight.BOLD)
-    duration_text = ft.Text("")
-    download_button = ft.ElevatedButton("Download", disabled=True)
-
-    placeholder_text = ft.Text(
-        "Enter a YouTube video URL and click 'Fetch video' to load video details.",
-        size=14,
-        color=ft.Colors.with_opacity(0.6, "black"),
-        text_align=ft.TextAlign.CENTER,
-    )
-    video_info_container = ft.Container(
-        content=ft.Column(
-            controls=[
-                thumbnail_image,
-                title_text,
-                duration_text,
-            ],
-            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=10,
-        ),
-        alignment=ft.alignment.Alignment.CENTER,
-        padding=20,
-        visible=False,
-    )
-    download_button_container = ft.Container(
-        content=download_button,
-        alignment=ft.alignment.Alignment.CENTER,
-        padding=20,
-        visible=False,
-    )
-
     def refresh_video_view() -> None:
         if video_info:
             thumbnail_image.src = video_info.thumbnail_url or ""
@@ -121,6 +85,47 @@ def build_single_video_tab(page: ft.Page, download_manager: DownloadManager) -> 
         logger.info("Single video added to download queue title=%s", video_info.title)
         status_text.value = "Added to download queue."
         page.update()
+
+
+    url_field = ft.TextField(
+        label="YouTube video URL", expand=True, on_submit=on_fetch_click
+    )
+    status_text = ft.Text("")
+    video_info: VideoInfo | None = None
+
+    thumbnail_image = ft.Image(width=320, height=180, src="")
+    title_text = ft.Text("", size=18, weight=ft.FontWeight.BOLD)
+    duration_text = ft.Text("")
+    download_button = ft.ElevatedButton("Download", disabled=True)
+
+    placeholder_text = ft.Text(
+        "Enter a YouTube video URL and click 'Fetch video' to load video details.",
+        size=14,
+        color=ft.Colors.with_opacity(0.6, "black"),
+        text_align=ft.TextAlign.CENTER,
+    )
+    video_info_container = ft.Container(
+        content=ft.Column(
+            controls=[
+                thumbnail_image,
+                title_text,
+                duration_text,
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            spacing=10,
+        ),
+        alignment=ft.alignment.Alignment.CENTER,
+        padding=20,
+        visible=False,
+    )
+    download_button_container = ft.Container(
+        content=download_button,
+        alignment=ft.alignment.Alignment.CENTER,
+        padding=20,
+        visible=False,
+    )
+
+
 
     fetch_button = ft.ElevatedButton("Fetch video", on_click=on_fetch_click)
     download_button.on_click = on_download_click

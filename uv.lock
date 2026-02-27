@@ -1012,7 +1012,7 @@ wheels = [
 
 [[package]]
 name = "youtube-downloader"
-version = "0.1.0"
+version = "1.2"
 source = { virtual = "." }
 dependencies = [
     { name = "flet", extra = ["all"] },
